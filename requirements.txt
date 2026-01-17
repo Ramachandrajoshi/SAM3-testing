@@ -1,0 +1,10 @@
+torch
+torchvision
+torchaudio
+opencv-python
+gradio
+numpy
+pillow
+tqdm
+huggingface_hub
+python-dotenv
