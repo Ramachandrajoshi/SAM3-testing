@@ -1,20 +1,20 @@
 import gradio as gr
 import cv2
 import numpy as np
-from core.analyzer import SAM3Analyzer
-from models.sam3_wrapper import SAM3Wrapper
+from core.analyzer import NSPVisualAnalysisSystemAnalyzer
+from models.nsp_wrapper import NSPVisualAnalysisSystemWrapper
 import os
 
 # Initialize components
-model = SAM3Wrapper()
+model = NSPVisualAnalysisSystemWrapper()
 # Load the actual downloaded weights
-model.load_model("data/checkpoints/sam3.pt")
-analyzer = SAM3Analyzer(model)
+model.load_model("data/checkpoints/nsp.pt")
+analyzer = NSPVisualAnalysisSystemAnalyzer(model)
 
 def process_image(input_img, text_prompt):
     """Gradio interface function for image analysis."""
     if input_img is None:
-        return None
+        return None, 0
     
     # Convert Gradio image (RGB) to numpy array if it isn't already
     image_np = np.array(input_img)
@@ -23,24 +23,24 @@ def process_image(input_img, text_prompt):
     prompts = {"text": text_prompt} if text_prompt else None
     
     # Core logic call
-    result = analyzer.analyze_image(image_np, prompts)
-    return result
+    result, count = analyzer.analyze_image(image_np, prompts)
+    return result, count
 
 def process_video(video_path):
     """Gradio interface function for video analysis."""
     if video_path is None:
-        return None
+        return None, 0
     
     output_path = "output_processed_video.mp4"
     # Core logic call
-    analyzer.process_video_file(video_path, output_path)
+    count = analyzer.process_video_file(video_path, output_path)
     
-    return output_path
+    return output_path, count
 
 # Gradio Blocks UI
-with gr.Blocks(title="SAM3 Video & Image Analysis") as demo:
-    gr.Markdown("# 🚀 SAM3: Segment Anything Model 3 - Video & Image Analysis")
-    gr.Markdown("Analyze and segment objects in images, video files, or live camera feeds using Meta's SAM3.")
+with gr.Blocks(title="NSP Visual Analysis System") as demo:
+    gr.Markdown("# 🚀 NSP Visual Analysis System - Video & Image Analysis")
+    gr.Markdown("Analyze and segment objects in images, video files, or live camera feeds using the NSP Visual Analysis System.")
     
     with gr.Tabs():
         # Image Tab
@@ -52,8 +52,9 @@ with gr.Blocks(title="SAM3 Video & Image Analysis") as demo:
                     img_button = gr.Button("Analyze Image")
                 with gr.Column():
                     img_output = gr.Image(label="Result")
+                    img_count = gr.Number(label="Object Count", precision=0)
             
-            img_button.click(process_image, inputs=[img_input, text_input], outputs=img_output)
+            img_button.click(process_image, inputs=[img_input, text_input], outputs=[img_output, img_count])
 
         # Video Tab
         with gr.TabItem("📽️ Video Analysis"):
@@ -63,16 +64,21 @@ with gr.Blocks(title="SAM3 Video & Image Analysis") as demo:
                     video_button = gr.Button("Process Video")
                 with gr.Column():
                     video_output = gr.Video(label="Processed Video")
+                    video_count = gr.Number(label="Total Objects Tracked", precision=0)
             
-            video_button.click(process_video, inputs=video_input, outputs=video_output)
+            video_button.click(process_video, inputs=video_input, outputs=[video_output, video_count])
 
         # Camera Tab (Note: Gradio's webcam input works frame-by-frame)
         with gr.TabItem("📸 Live Camera"):
             gr.Markdown("Note: Live processing may depend on your GPU capability.")
-            cam_input = gr.Image(sources="webcam", streaming=True, label="Live Feed")
-            cam_output = gr.Image(label="Segmented Feed")
+            with gr.Row():
+                with gr.Column():
+                    cam_input = gr.Image(sources="webcam", streaming=True, label="Live Feed")
+                with gr.Column():
+                    cam_output = gr.Image(label="Segmented Feed")
+                    cam_count = gr.Number(label="Objects in Frame", precision=0)
             
-            cam_input.stream(process_image, inputs=[cam_input, gr.State(None)], outputs=cam_output)
+            cam_input.stream(process_image, inputs=[cam_input, gr.State(None)], outputs=[cam_output, cam_count])
 
     gr.Markdown("### Instructions")
     gr.Markdown("""

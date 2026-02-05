@@ -35,7 +35,7 @@ class VideoHandler:
             if callback:
                 frame = callback(frame)
             
-            cv2.imshow('SAM3 Real-time Analysis', frame)
+            cv2.imshow('NSP Visual Analysis System Real-time Analysis', frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         

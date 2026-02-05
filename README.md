@@ -1,6 +1,6 @@
-# SAM3 Video & Image Analysis
+# NSP Visual Analysis System
 
-This project provides a robust framework for object segmentation in images and videos using Meta's SAM3 (Segment Anything Model 3).
+This project provides a robust framework for object segmentation in images and videos using the NSP Visual Analysis System (based on Segment Anything Model 3).
 
 ## Features
 - **Image Analysis**: Segment objects in static images with text or point prompts.
@@ -11,7 +11,7 @@ This project provides a robust framework for object segmentation in images and v
 
 ## Project Structure
 - `app.py`: Gradio frontend.
-- `core/`: High-level analysis logic (SAM3Analyzer).
+- `core/`: High-level analysis logic (NSPVisualAnalysisSystemAnalyzer).
 - `models/`: Model wrappers and base classes.
 - `utils/`: Video processing and visualization utilities.
 - `data/checkpoints/`: Directory for model weights.
@@ -30,15 +30,15 @@ source venv/bin/activate  # Linux/Mac
 pip install -r requirements.txt
 ```
 
-### 3. Install SAM3 Library
-Follow the instructions from the official [Meta SAM3 Repository](https://github.com/facebookresearch/sam3).
+### 3. Install Required Library
+Follow the instructions for installing the underlying segmentation engine.
 Typically:
 ```bash
 pip install git+https://github.com/facebookresearch/sam3.git
 ```
 
 ### 4. Download Model Weights
-Place the SAM3 checkpoints in `data/checkpoints/`.
+Place the model checkpoints in `data/checkpoints/` as `nsp.pt`.
 
 ### 5. Run the Application
 ```bash

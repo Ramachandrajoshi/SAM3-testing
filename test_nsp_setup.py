@@ -1,12 +1,12 @@
 import numpy as np
-from models.sam3_wrapper import SAM3Wrapper
+from models.nsp_wrapper import NSPVisualAnalysisSystemWrapper
 import torch
 
-def test_sam3():
-    print("Initializing SAM3Wrapper...")
-    wrapper = SAM3Wrapper()
+def test_nsp():
+    print("Initializing NSPVisualAnalysisSystemWrapper...")
+    wrapper = NSPVisualAnalysisSystemWrapper()
     
-    checkpoint_path = "data/checkpoints/sam3.pt"
+    checkpoint_path = "data/checkpoints/nsp.pt"
     print(f"Loading model from {checkpoint_path}...")
     wrapper.load_model(checkpoint_path)
     
@@ -20,8 +20,8 @@ def test_sam3():
     print(f"Number of masks found (text): {len(results)}")
 
     print("Testing box prompt prediction...")
-    # Box format: [x0, y0, x1, y1] for SAM2Predictor usually
-    # But wait, SAM3InteractiveImagePredictor might expect something else?
+    # Box format: [x0, y0, x1, y1] for predictor usually
+    # But wait, NSP Visual Analysis System might expect something else?
     # Let's try [100, 100, 300, 300]
     prompts = {"boxes": np.array([100, 100, 300, 300])}
     results = wrapper.predict_image(image, prompts)
@@ -34,4 +34,4 @@ def test_sam3():
         print("No masks found, but no crash either.")
 
 if __name__ == "__main__":
-    test_sam3()
+    test_nsp()

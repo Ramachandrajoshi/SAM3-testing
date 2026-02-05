@@ -3,17 +3,17 @@ import numpy as np
 from .base_model import BaseSegmentationModel
 from PIL import Image
 
-# Use the actual sam3 library
+# Use the actual segmentation library
 try:
     from sam3.model_builder import build_sam3_image_model
     from sam3.model.sam3_image_processor import Sam3Processor
-    HAS_SAM3 = True
+    HAS_LIBRARY = True
 except ImportError:
-    HAS_SAM3 = False
+    HAS_LIBRARY = False
 
-class SAM3Wrapper(BaseSegmentationModel):
+class NSPVisualAnalysisSystemWrapper(BaseSegmentationModel):
     """
-    Implementation of BaseSegmentationModel for Meta's SAM3.
+    Implementation of BaseSegmentationModel for NSP Visual Analysis System.
     """
     
     def __init__(self, device: str = None):
@@ -21,12 +21,12 @@ class SAM3Wrapper(BaseSegmentationModel):
         self.model = None
         self.processor = None
 
-    def load_model(self, checkpoint_path: str, model_type: str = "sam3_h"):
+    def load_model(self, checkpoint_path: str, model_type: str = "nsp_h"):
         """
-        Load SAM3 model weights.
+        Load NSP Visual Analysis System model weights.
         """
-        print(f"Loading SAM3 model from {checkpoint_path}...")
-        if HAS_SAM3:
+        print(f"Loading NSP Visual Analysis System model from {checkpoint_path}...")
+        if HAS_LIBRARY:
             # build_sam3_image_model handles the construction and weight loading
             self.model = build_sam3_image_model(
                 checkpoint_path=checkpoint_path,
@@ -35,16 +35,16 @@ class SAM3Wrapper(BaseSegmentationModel):
             )
             self.processor = Sam3Processor(self.model, device=self.device)
         else:
-            print("Warning: SAM3 library not found. Running in mock mode.")
+            print("Warning: NSP Visual Analysis System library not found. Running in mock mode.")
 
     def predict_image(self, image: np.ndarray, prompts: dict = None) -> list:
         """
-        Segment objects in an image using SAM3.
+        Segment objects in an image using NSP Visual Analysis System.
         """
-        if not self.model and HAS_SAM3:
+        if not self.model and HAS_LIBRARY:
             raise RuntimeError("Model not loaded. Call load_model() first.")
         
-        if not HAS_SAM3:
+        if not HAS_LIBRARY:
             return []
 
         # Convert numpy array to PIL Image for the processor
@@ -80,8 +80,9 @@ class SAM3Wrapper(BaseSegmentationModel):
 
     def predict_video(self, video_path: str, output_path: str, prompts: dict = None):
         """
-        Track and segment objects in a video using SAM3.
+        Track and segment objects in a video using NSP Visual Analysis System.
         """
         print(f"Processing video: {video_path}")
         # Placeholder for video tracking logic
-        pass
+        # In a real implementation, this would return the total number of unique objects tracked
+        return 0

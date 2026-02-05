@@ -3,7 +3,7 @@ import numpy as np
 from models.base_model import BaseSegmentationModel
 from utils.visualization import draw_results
 
-class SAM3Analyzer:
+class NSPVisualAnalysisSystemAnalyzer:
     """
     Core Logic class that coordinates between the UI and the Model.
     Adheres to the Single Responsibility Principle.
@@ -14,18 +14,23 @@ class SAM3Analyzer:
 
     def analyze_image(self, image: np.ndarray, prompts: dict = None):
         """
-        Analyze a single image and return the annotated result.
+        Analyze a single image and return the annotated result and object count.
         """
         # 1. Get predictions from model
         masks = self.model.predict_image(image, prompts)
+        count = len(masks)
         
         # 2. Draw results
-        if len(masks) > 0:
-            annotated_image = draw_results(image, masks)
+        if count > 0:
+            labels = [f"ID:{i+1}" for i in range(count)]
+            annotated_image = draw_results(image, masks, labels=labels)
+            # Add text overlay for count
+            cv2.putText(annotated_image, f"Count: {count}", (20, 50),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
         else:
             annotated_image = image
             
-        return annotated_image
+        return annotated_image, count
 
     def analyze_video_frame(self, frame: np.ndarray, prompts: dict = None):
         """
@@ -38,4 +43,5 @@ class SAM3Analyzer:
         """
         Process a full video file.
         """
-        return self.model.predict_video(input_path, output_path)
+        count = self.model.predict_video(input_path, output_path)
+        return count

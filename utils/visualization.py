@@ -22,14 +22,23 @@ def draw_results(image: np.ndarray, masks: list, boxes: list = None, labels: lis
         color = np.random.random(3)
         annotated_image = apply_mask(annotated_image, mask, color)
         
+        # Determine where to put the label/box
+        current_box = None
         if boxes is not None and i < len(boxes):
-            box = boxes[i]
-            cv2.rectangle(annotated_image, (int(box[0]), int(box[1])), 
-                          (int(box[2]), int(box[3])), (0, 255, 0), 2)
+            current_box = boxes[i]
+        else:
+            # Calculate bounding box from mask
+            y, x = np.where(mask > 0)
+            if len(y) > 0 and len(x) > 0:
+                current_box = [np.min(x), np.min(y), np.max(x), np.max(y)]
+
+        if current_box is not None:
+            cv2.rectangle(annotated_image, (int(current_box[0]), int(current_box[1])), 
+                          (int(current_box[2]), int(current_box[3])), (0, 255, 0), 2)
             
-        if labels is not None and i < len(labels):
-            label = labels[i]
-            cv2.putText(annotated_image, str(label), (int(box[0]), int(box[1]) - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            if labels is not None and i < len(labels):
+                label = labels[i]
+                cv2.putText(annotated_image, str(label), (int(current_box[0]), int(current_box[1]) - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
             
     return annotated_image
