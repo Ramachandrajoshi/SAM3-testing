@@ -78,6 +78,68 @@ class NSPVisualAnalysisSystemWrapper(BaseSegmentationModel):
         
         return results
 
+    def predict_all(self, image: np.ndarray, grid_n: int = 12,
+                    iou_threshold: float = 0.70,
+                    min_area_ratio: float = 0.0005,
+                    max_area_ratio: float = 0.25) -> list:
+        """
+        Auto-segment ALL objects via a grid of center-point prompts.
+        Returns a deduplicated list of binary H×W boolean masks,
+        sorted by area ascending (small objects on top in overlay).
+        """
+        if not HAS_LIBRARY:
+            return []
+        if self.model is None:
+            raise RuntimeError("Model not loaded. Call load_model() first.")
+
+        h, w      = image.shape[:2]
+        total_px  = h * w
+        min_area  = int(total_px * min_area_ratio)
+        max_area  = int(total_px * max_area_ratio)
+
+        pil_img   = Image.fromarray(image.astype("uint8"), "RGB")
+        state     = self.processor.set_image(pil_img)
+
+        kept_masks: list = []
+
+        step_y = h / (grid_n + 1)
+        step_x = w / (grid_n + 1)
+
+        for row in range(1, grid_n + 1):
+            for col in range(1, grid_n + 1):
+                cy = np.array([[col * step_x, row * step_y]], dtype=float)
+                cl = np.array([1], dtype=int)
+                try:
+                    masks, scores, _ = self.model.predict_inst(
+                        state,
+                        point_coords=cy,
+                        point_labels=cl,
+                        box=None,
+                        multimask_output=True,
+                    )
+                    best = masks[int(np.argmax(scores))].astype(bool)
+                except Exception:
+                    continue
+
+                area = int(best.sum())
+                if area < min_area or area > max_area:
+                    continue          # skip tiny noise and large background blobs
+
+                # IoU deduplication
+                duplicate = False
+                for existing in kept_masks:
+                    inter = int((best & existing).sum())
+                    union = int((best | existing).sum())
+                    if union > 0 and inter / union > iou_threshold:
+                        duplicate = True
+                        break
+                if not duplicate:
+                    kept_masks.append(best)
+
+        # Sort by area ascending so small objects paint on top in the overlay
+        kept_masks.sort(key=lambda m: int(m.sum()))
+        return kept_masks
+
     def predict_video(self, video_path: str, output_path: str, prompts: dict = None):
         """
         Track and segment objects in a video using NSP Visual Analysis System.
