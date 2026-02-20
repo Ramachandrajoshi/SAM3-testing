@@ -14,17 +14,17 @@ def test_nsp():
     image = np.zeros((512, 512, 3), dtype=np.uint8)
     image[100:300, 100:300, :] = 255 # A white square
     
-    print("Testing text prompt prediction...")
+    print("Testing text prompt prediction with threshold...")
     prompts = {"text": "a white square"}
-    results = wrapper.predict_image(image, prompts)
+    results = wrapper.predict_image(image, prompts, confidence_threshold=0.5)
     print(f"Number of masks found (text): {len(results)}")
 
-    print("Testing box prompt prediction...")
+    print("Testing box prompt prediction with threshold...")
     # Box format: [x0, y0, x1, y1] for predictor usually
     # But wait, NSP Visual Analysis System might expect something else?
     # Let's try [100, 100, 300, 300]
     prompts = {"boxes": np.array([100, 100, 300, 300])}
-    results = wrapper.predict_image(image, prompts)
+    results = wrapper.predict_image(image, prompts, confidence_threshold=0.5)
     
     print(f"Number of masks found (box): {len(results)}")
     if len(results) > 0:

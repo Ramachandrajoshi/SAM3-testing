@@ -14,11 +14,11 @@ This project is a Python-based framework for object segmentation and tracking in
 
 ### Architecture
 The project follows clean architecture principles (SOLID & DRY):
-- **Frontend (`app.py`):** Gradio-based web interface with tabs for Image, Video, and Live Camera analysis.
-- **Core Logic (`core/analyzer.py`):** The `NSPVisualAnalysisSystemAnalyzer` class coordinates between the UI and the model wrapper, handling high-level analysis tasks.
+- **Frontend (`app.py`):** Gradio-based web interface with tabs for Image, Video, and Live Camera analysis. Includes text prompts and confidence threshold sliders for both image and video.
+- **Core Logic (`core/analyzer.py`):** The `NSPVisualAnalysisSystemAnalyzer` class coordinates between the UI and the model wrapper. It handles video file processing with a unified interface.
 - **Models (`models/`):** 
-    - `base_model.py`: Defines the `BaseSegmentationModel` abstract interface.
-    - `nsp_wrapper.py`: Implements the NSP Visual Analysis System-specific logic.
+    - `base_model.py`: Defines the `BaseSegmentationModel` abstract interface, now supporting confidence thresholds.
+    - `nsp_wrapper.py`: Implements the NSP Visual Analysis System logic. Features a robust video processing loop that propagates prompts frame-by-frame.
 - **Utilities (`utils/`):** 
     - `video_utils.py`: Handles video reading, writing, and property extraction.
     - `visualization.py`: Contains logic for drawing masks and results on images.
